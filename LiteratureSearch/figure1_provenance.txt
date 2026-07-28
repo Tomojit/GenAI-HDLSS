@@ -1,0 +1,12 @@
+Figure 1 — provenance and reproduction details
+==================================================
+Database:        OpenAlex (https://openalex.org), REST API
+Extraction date: 2026-07-04 (UTC)
+Search field:    title_and_abstract.search (title + abstract only)
+Text handling:   Kstem stemming + stop-word removal; double quotes = exact phrase; AND/OR uppercase boolean operators
+Inclusion:       type=article; from_publication_date 2015-01-01; to_publication_date 2025-12-31; has_abstract=true
+Logic:           ≥1 biological-data term AND ≥1 generative-model term
+De-duplication:  by DOI (lowercased), OpenAlex Work ID fallback
+
+Full Boolean query string:
+("scRNA-seq" OR "scRNAseq" OR "bulk RNA" OR "transcriptomic data" OR "transcriptomics" OR "single-cell" OR "single cell" OR "biomarker discovery" OR "biomarker selection" OR "synthetic biology" OR "bioinformatics" OR "molecular biology" OR "gene networks" OR "gene network" OR "protein folding" OR "protein structure" OR "genomics" OR "genome sequencing" OR "proteomics" OR "metabolomics" OR "gene expression data" OR "gene expression" OR "biological sequences" OR "biological sequence" OR "protein structure prediction" OR "biological datasets" OR "DNA sequences" OR "RNA sequences" OR "epigenomics" OR "metagenomics" OR "lipidomics" OR "glycomics" OR "nutrigenomics" OR "RNA-seq" OR "RNA sequencing" OR "ATAC-seq" OR "scATAC-seq" OR "CITE-seq" OR "Hi-C" OR "multi-omics" OR "multiomics" OR "omics" OR "DNA methylation") AND ("variational autoencoder" OR "variational autoencoders" OR "adversarial autoencoder" OR "generative adversarial network" OR "generative adversarial networks" OR "generative adversarial" OR "denoising diffusion probabilistic model" OR "denoising diffusion probabilistic models" OR "denoising diffusion" OR "diffusion probabilistic model" OR "score-based generative model" OR "score-based generative models" OR "deep generative model" OR "deep generative models" OR "normalizing flow" OR "normalizing flows" OR "generative neural network" OR "generative neural networks" OR "deep belief network" OR "deep belief networks" OR "energy-based generative" OR "latent diffusion" OR "deep generative" OR "generative ai" OR "generative artificial intelligence")
