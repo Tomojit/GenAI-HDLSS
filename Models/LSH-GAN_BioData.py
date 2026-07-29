@@ -185,7 +185,7 @@ def unStandardizeData(data,mu,std):
     return std * data + mu
     
 def load_IBD_Data():
-    dataFile = './Dataset/GDS1615Dataset.csv'
+    dataFile = '../Dataset/GDS1615Dataset.csv'
     df = pd.read_csv(dataFile,delimiter=',',header=0,low_memory=False)
     data = df.values[:-1,2:].astype('float64')
     
