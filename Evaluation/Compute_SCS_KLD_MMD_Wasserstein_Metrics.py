@@ -255,7 +255,7 @@ if __name__ == "__main__":
     # -------------------------
     
     dataSetName = "IBD"
-    #models = ['VAE','scDiffusion','LSH_GAN']
+    models = ['VAE','scDiffusion','LSH_GAN']
     itrs = 5
     evaluate_one_dataset(dataSetName, itrs, models)
 
