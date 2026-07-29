@@ -90,7 +90,7 @@ class VAE(nn.Module):
 
 def loadIBDData():
 	
-	dataFile = './Dataset/GDS1615Dataset.csv'
+	dataFile = '../Dataset/GDS1615Dataset.csv'
 	#pdb.set_trace()
 	df = pd.read_csv(dataFile,delimiter=',',header=0,low_memory=False)
 	probe_ids = df['ID_REF'].iloc[:-1].values
