@@ -8,6 +8,10 @@ The five files correspond to five independent training runs of the VAE. Due to G
 
 The extracted synthetic datasets can be compared with the empirical `GDS1615Dataset.csv` dataset provided in the `Dataset` folder.
 
+## File Extraction
+
+Each `.zip` archive contains the synthetic dataset from one independent model run. Extract all five archives before executing the evaluation script.
+
 ## Evaluation
 
 The five synthetic datasets were evaluated using:
