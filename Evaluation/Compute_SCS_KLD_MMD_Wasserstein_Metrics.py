@@ -5,7 +5,7 @@ from sklearn.metrics import pairwise_distances
 from sklearn.metrics.pairwise import rbf_kernel
 from scipy.spatial.distance import pdist, cdist
 from scipy.spatial.distance import jensenshannon
-from utilityDBN import *
+#from utilityDBN import *
 
 # Install POT first if needed:
 # pip install POT
@@ -163,6 +163,13 @@ def wasserstein_pot(X, Y):
     return ot.emd2(a, b, M)
 
 
+def load_IBD_Data():
+    dataFile = '../Dataset/GDS1615Dataset.csv'
+    df = pd.read_csv(dataFile,delimiter=',',header=0,low_memory=False)
+    data = df.values[:-1,2:].astype('float64')
+    
+    return data.T
+
 def evaluate_one_dataset(dataSetName, itrs, models):
     """
     dataSetName: a string either IBD, BreastCancer, or GEO_RNA
@@ -170,7 +177,7 @@ def evaluate_one_dataset(dataSetName, itrs, models):
     models: a lits of string
     """
     
-    X,_,_,_ = getApplicationData(dataSetName,nSamplePerClass=0)
+    X = load_IBD_Data()
 
     if dataSetName in ['BreastCancer','IBD']:
         nFea = 22282
@@ -233,20 +240,20 @@ def evaluate_one_dataset(dataSetName, itrs, models):
         
         print("\t Model:", model)
         if model == 'VAE':
-            print("\t \t Average KLD: {:.5f}%".format(np.mean(KLD_VAE)),'+/-','{:.5f}'.format(np.std(KLD_VAE)))
             print("\t \t Average MMD: {:.5f}%".format(np.mean(MMD_VAE)),'+/-','{:.5f}'.format(np.std(MMD_VAE)))
-            print("\t \t Average SCS: {:.5f}%".format(np.mean(SSA_VAE)),'+/-','{:.5f}'.format(np.std(SSA_VAE)))
             print("\t \t Average Wass Dist: {:.5f}%".format(np.mean(Wass_Dist_VAE)),'+/-','{:.5f}'.format(np.std(Wass_Dist_VAE)))
+            print("\t \t Average SCS: {:.5f}%".format(np.mean(SSA_VAE)),'+/-','{:.5f}'.format(np.std(SSA_VAE)))
+            print("\t \t Average KLD: {:.5f}%".format(np.mean(KLD_VAE)),'+/-','{:.5f}'.format(np.std(KLD_VAE)))
         elif model == 'scDiffusion':
-            print("\t \t Average KLD: {:.5f}%".format(np.mean(KLD_scDiffusion)),'+/-','{:.5f}'.format(np.std(KLD_scDiffusion)))
             print("\t \t Average MMD: {:.5f}%".format(np.mean(MMD_scDiffusion)),'+/-','{:.5f}'.format(np.std(MMD_scDiffusion)))
-            print("\t \t Average SCS: {:.5f}%".format(np.mean(SSA_scDiffusion)),'+/-','{:.5f}'.format(np.std(SSA_scDiffusion)))
             print("\t \t Average Wass Dist: {:.5f}%".format(np.mean(Wass_Dist_scDiffusion)),'+/-','{:.5f}'.format(np.std(Wass_Dist_scDiffusion)))
+            print("\t \t Average SCS: {:.5f}%".format(np.mean(SSA_scDiffusion)),'+/-','{:.5f}'.format(np.std(SSA_scDiffusion)))
+            print("\t \t Average KLD: {:.5f}%".format(np.mean(KLD_scDiffusion)),'+/-','{:.5f}'.format(np.std(KLD_scDiffusion)))
         else:
-            print("\t \t Average KLD: {:.5f}%".format(np.mean(KLD_LSH_GAN)),'+/-','{:.5f}'.format(np.std(KLD_LSH_GAN)))
             print("\t \t Average MMD: {:.5f}%".format(np.mean(MMD_LSH_GAN)),'+/-','{:.5f}'.format(np.std(MMD_LSH_GAN)))
-            print("\t \t Average SCS: {:.5f}%".format(np.mean(SSA_LSH_GAN)),'+/-','{:.5f}'.format(np.std(SSA_LSH_GAN)))
             print("\t \t Average Wass Dist: {:.5f}%".format(np.mean(Wass_Dist_LSH_GAN)),'+/-','{:.5f}'.format(np.std(Wass_Dist_LSH_GAN)))
+            print("\t \t Average SCS: {:.5f}%".format(np.mean(SSA_LSH_GAN)),'+/-','{:.5f}'.format(np.std(SSA_LSH_GAN)))
+            print("\t \t Average KLD: {:.5f}%".format(np.mean(KLD_LSH_GAN)),'+/-','{:.5f}'.format(np.std(KLD_LSH_GAN)))
 
 if __name__ == "__main__":
 
