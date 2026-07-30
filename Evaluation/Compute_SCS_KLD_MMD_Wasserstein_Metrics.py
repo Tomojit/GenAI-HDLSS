@@ -181,7 +181,7 @@ def evaluate_one_dataset(dataSetName, itrs, models):
 
     if dataSetName in ['BreastCancer','IBD']:
         nFea = 22282
-    elif dataSetName in ['RNA_GEO','RNA']:
+    elif dataSetName in ['RNA_GEO']:
         nFea = 6658
     X = X[:,:nFea]
     
