@@ -4,8 +4,6 @@ from pathlib import Path
 from sklearn.metrics import pairwise_distances
 from sklearn.metrics.pairwise import rbf_kernel
 from scipy.spatial.distance import pdist, cdist
-from scipy.spatial.distance import jensenshannon
-#from utilityDBN import *
 
 # Install POT first if needed:
 # pip install POT
@@ -74,13 +72,6 @@ def kl_divergence(p, q):
     p = p + epsilon
     q = q + epsilon
     return np.sum(p * np.log(p / q))
-    
-def js_divergence(p, q, epsilon=1e-3):
-    p = np.asarray(p, dtype=float) + epsilon
-    q = np.asarray(q, dtype=float) + epsilon
-    p = p / p.sum()
-    q = q / q.sum()
-    return jensenshannon(p, q, base=np.e) ** 2
 
 def symmetric_kl_divergence(Origdata, Synthdata, nBins=50):
 
@@ -105,8 +96,6 @@ def symmetric_kl_divergence(Origdata, Synthdata, nBins=50):
     kl_orig_to_synth = kl_divergence(p_orig, p_synth)
     kl_synth_to_orig = kl_divergence(p_synth, p_orig)
 
-    #return js_divergence(p_orig, p_synth)
-    #pdb.set_trace()
     return 0.5* (kl_orig_to_synth + kl_synth_to_orig)
 
 def median_heuristic_sigma(X, Y):
