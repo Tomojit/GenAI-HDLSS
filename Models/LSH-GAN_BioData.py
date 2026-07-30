@@ -441,8 +441,8 @@ for epoch in range(1, epochs + 1):
     # Store loss values
     loss_records.append([epoch, disc_loss.numpy(), gen_loss.numpy()])
 
-    # Save outputs every 10 epochs
-    if epoch % 100 == 0:
+    # Save outputs
+    if epoch % epochs == 0:
         print(f"\n=== Saving outputs at Epoch {epoch} ===")
 
         # Generate synthetic data
@@ -450,18 +450,6 @@ for epoch in range(1, epochs + 1):
 
         # Save synthetic data (CSV)
         pd.DataFrame(synthetic_sample).to_csv(f"LSH-GAN_synthetic_data_epoch_{epoch}.csv", index=False)
-
-        # Save generator weights (CSV)
-        gen_weights = []
-        for var in generator.trainable_variables:
-            gen_weights.extend(var.numpy().flatten())
-        pd.DataFrame(gen_weights).to_csv(f"generator_epoch_{epoch}.csv", index=False, header=["weights"])
-
-        # Save discriminator weights (CSV)
-        disc_weights = []
-        for var in discriminator.trainable_variables:
-            disc_weights.extend(var.numpy().flatten())
-        pd.DataFrame(disc_weights).to_csv(f"discriminator_epoch_{epoch}.csv", index=False, header=["weights"])
 
         # Combine both datasets
         combined_data = np.vstack([original_data, synthetic_sample])
@@ -475,10 +463,6 @@ for epoch in range(1, epochs + 1):
         original_pca = combined_pca[:n_original]
         synthetic_pca = combined_pca[n_original:]
 
-        # Save PCA coordinates
-        pd.DataFrame(original_pca, columns=['PC1', 'PC2']).to_csv(f"original_pca_coordinates_epoch_{epoch}.csv", index=False)
-        pd.DataFrame(synthetic_pca, columns=['PC1', 'PC2']).to_csv(f"synthetic_pca_coordinates_epoch_{epoch}.csv", index=False)
-
         # PCA plot
         plt.figure(figsize=(10, 7))
         plt.scatter(original_pca[:, 0], original_pca[:, 1], label="Real", alpha=0.6, c="blue")
@@ -489,10 +473,10 @@ for epoch in range(1, epochs + 1):
         plt.legend()
         plt.grid(True, linestyle="--", alpha=0.7)
         plt.tight_layout()
-        plt.savefig(f"GAN_PCA_epoch_{epoch}.png", dpi=300)
+        plt.savefig(f"./LSH-GAN_PCA_epoch_{epoch}.png", dpi=300)
         plt.close()
 
-        # Save loss plot every 10 epochs
+        # Save loss plot
         loss_df = pd.DataFrame(loss_records, columns=["Epoch", "Discriminator_Loss", "Generator_Loss"])
         plt.figure(figsize=(10, 6))
         plt.plot(loss_df["Epoch"], loss_df["Discriminator_Loss"], label="Discriminator Loss", color="blue")
@@ -503,14 +487,10 @@ for epoch in range(1, epochs + 1):
         plt.legend()
         plt.grid(True, linestyle="--", alpha=0.7)
         plt.tight_layout()
-        plt.savefig(f"training_losses_epoch_{epoch}.png", dpi=300)
+        plt.savefig(f"./LSH_GAN_training_losses_epoch_{epoch}.png", dpi=300)
         plt.close()
         
         print(f"Saved outputs for epoch {epoch}\n")
-
-# Save all loss records to CSV once at the end
-loss_df = pd.DataFrame(loss_records, columns=["Epoch", "Discriminator_Loss", "Generator_Loss"])
-loss_df.to_csv("training_losses.csv", index=False)
 
 stop = timeit.default_timer()
 print('\n' + "="*60)
