@@ -1,0 +1,135 @@
+2ndFeb2026
+===========================
+## Diary Entry: Fixing My Python & Jupyter Environment
+
+**Context**
+I was working on a shared machine (same Linux user for everyone) and VS Code couldn’t run notebook cells because `ipykernel` was missing. Installing anything blindly could affect others, so I had to be careful and do this the *right* way.
+
+**What went wrong initially**
+VS Code showed a workspace environment called `scdiff-env`, but it turned out not to be a real Python environment. It had activation scripts but no `python` or `pip`. Activating it changed the prompt but didn’t actually switch Python, which caused confusion and blocked safe installation of `ipykernel`.
+
+**The clean solution**
+To avoid touching system Python or the shared conda base, I created a brand‑new, isolated conda environment named `scDiffRNA2ndFeb2026` with Python 3.10. This gave me a private Python setup for my project while respecting the shared server.
+
+**Why activation mattered**
+I made sure only *one* environment was active at a time (no stacking). I verified the active Python by checking the executable path. Once it pointed to `anaconda3/envs/scDiffRNA2ndFeb2026/bin/python`, I knew everything I did next would affect only my environment.
+
+**Installing ipykernel**
+I installed `ipykernel` inside the new conda environment. This step is essential because `ipykernel` is the engine that allows Jupyter/VS Code to execute notebook cells. Without it, notebooks can’t run even if Python exists.
+
+**What “registering the kernel” means**
+Registering the kernel does *not* install Python or libraries. It simply tells Jupyter where a usable Python lives. This creates a small metadata entry so that VS Code/Jupyter can list the environment by name and start it when I select it.
+
+**Result**
+After registering, my environment appeared as **Python (scDiffRNA2ndFeb2026)** in the kernel picker. Selecting it ensures all notebook cells run with the correct Python and libraries.
+
+**Why this approach is correct**
+I avoided modifying system Python and conda base, respected the shared machine, and ended up with a clean, reproducible setup. This is proper research and lab‑server hygiene.
+
+**Final takeaway**
+I created an isolated Python environment, enabled it to run notebooks, and explicitly told Jupyter how to find it. From now on, selecting **Python (scDiffRNA2ndFeb2026)** guarantees my notebooks run safely and correctly.
+
+
+4thFeb2026
+==========================
+made changes, I mean added classes such that now it runs without VAE.
+
+All of this runs in scDiffRNA3Feb26 env, and also runs in "GPU 0" not on "GPU 1"
+
+without VAE
+-----------------------------
+CUDA_VISIBLE_DEVICES=0 python -u cell_trainNoVAE.py   --data_dir "data/suzuki.h5ad"   --vae_path "output/checkpoint/AE/suzuki_VAE/model_seed=0_step=10000.pt"   --model_name "suzuki_diffusion"   --save_dir "output/checkpoint/backbone"   --lr_anneal_steps 20000   --batch_size 10   --log_interval 10   --save_interval 1000
+ actually we dont need vae_path
+
+
+python cell_sampleNoVAE.py \
+  --model_path "output/checkpoint/backbone/suzuki_diffusion/model020000.pt" \
+  --sample_dir "output/simulated_samples/suzuki" \
+  --num_samples 3000 \
+  --batch_size 1000
+
+The changes made only work for no classes
+
+suzukiVisual.py for 2dpca plot with VAE
+suzukiVisualNoVAE.py for 2dPCA plot without VAE, on full dataset with no dim red.
+
+
+
+CUDA_VISIBLE_DEVICES=0 python -u cell_trainNoVAE.py   --data_dir "data/suzukiSVD.h5ad"   --model_name "suzuki_SVD_diffusion"   --save_dir "output/checkpoint/backbone"   --lr_anneal_steps 2000  --batch_size 10   --log_interval 10   --save_interval 1000
+ actually we dont need vae_path
+
+python cell_sampleNoVAE.py \
+  --model_path "output/checkpoint/backbone/suzuki_SVD_diffusion/model002000.pt" \
+  --sample_dir "output/simulated_samples/suzukiSVD" \
+  --num_samples 30 \
+  --batch_size 10
+
+with VAE, also it works, as usual
+---------------------------------
+python -u VAE_train.py \
+  --data_dir "data/suzuki.h5ad" \
+  --num_genes 22206 \
+  --save_dir "..output/checkpoint/AE/suzuki_VAE" \
+  --max_steps 20000 \
+  --batch_size 2 \
+  --state_dict "/home/ghoshstudents/VijayNewbase/tghosh-vijay-ConvexLDA/scDiffusion/guided-diffusion/scimilarity-main/models/annotation_model_v1"
+
+
+CUDA_VISIBLE_DEVICES=0 python -u cell_train.py \
+  --data_dir "data/suzuki.h5ad" \
+  --vae_path "output/checkpoint/AE/suzuki_VAE/model_seed=0_step=10000.pt" \
+  --model_name "suzuki_diffusion" \
+  --save_dir "output/checkpoint/backbone" \
+  --lr_anneal_steps 20000 \
+  --batch_size 10 \
+  --log_interval 10 \
+  --save_interval 1000
+
+python cell_sample.py \
+  --model_path "output/checkpoint/backbone/suzuki_diffusion/model020000.pt" \
+  --sample_dir "output/simulated_samples/suzuki" \
+  --num_samples 3000 \
+  --batch_size 1000
+
+************************* EVERYTHING SHOULD BE RUN IN "scDiffRNA3Feb26" ENV. ********************************
+
+12thFeb2026
+==========================================================
+Now suzukicsvTOh5ad.ipnyb has code for transpose data as well which is stored in data/suzukiTranspose.h5ad and now size is (22206,10)
+
+
+16thFeb2026
+==========================================================
+*********This is for Transpose data of Suzuki, check once, not very sure.***********
+CUDA_VISIBLE_DEVICES=0 python -u cell_trainNoVAE.py   --data_dir "data/suzukiTranspose.h5ad"   --vae_path "output/checkpoint/AE/suzuki_VAE/model_seed=0_step=10000.pt"   --model_name "suzukiTranspose_diffusion"   --save_dir "output/checkpoint/backbone"   --lr_anneal_steps 20000   --batch_size 10000   --log_interval 1000   --save_interval 1000
+
+
+python cell_sampleNoVAE.py \
+  --model_path "output/checkpoint/backbone/suzukiTranspose_diffusion/model020000.pt" \
+  --sample_dir "output/simulated_samples/suzukiTranspose" \
+  --num_samples 1000 \
+  --batch_size 100
+
+
+19thFeb2026
+======================================================
+used lossPlot.py to plot loss func
+
+24thFeb2026
+=====================================================
+basicDiff.py is very basic implementation on DDPM, it is also there is VijayNewbase, here I might make chanmges to it to make it apt to datasets and usecases.
+
+16thMarch2026
+===================================================
+suzukicsvTOh5ad.csv is also used to mossd dataset, careful and look at the comment lines while using it for suzuki and mossd.
+
+19thMarch2026
+===================================================
+basicDiff2.py is created to bump back svd data to original space and do pca.
+"diffusion is not sample specific like VAE" this was discussed with ghosh yesterday, maybe put this in thesis doc.
+
+
+24thMarch2026
+=====================================================
+created a new folder called basicDiff, going forward everything will be done there related to basic diffusion code.
+this notes will be copied and pasted there aswell.

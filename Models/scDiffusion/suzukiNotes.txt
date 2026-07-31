@@ -1,0 +1,24 @@
+4thFeb2025
+=====================================
+python -u VAE_train.py \
+  --data_dir "data/suzuki.h5ad" \
+  --num_genes 22206 \
+  --save_dir "..output/checkpoint/AE/suzuki_VAE" \
+  --max_steps 20000 \
+  --batch_size 2 \
+  --state_dict "/home/ghoshstudents/VijayNewbase/tghosh-vijay-ConvexLDA/scDiffusion/guided-diffusion/scimilarity-main/models/annotation_model_v1"
+
+
+CUDA_VISIBLE_DEVICES=0 python -u cell_train.py \
+  --data_dir "data/suzuki.h5ad" \
+  --vae_path "output/checkpoint/AE/suzuki_VAE/model_seed=0_step=10000.pt" \
+  --model_name "suzuki_diffusion" \
+  --save_dir "output/checkpoint/backbone" \
+  --lr_anneal_steps 20000 \
+  --batch_size 10 \
+  --log_interval 10 \
+  --save_interval 1000
+
+python cell_sample.py --model_path 'output/checkpoint/backbone/suzuki_diffusion/model020000.pt' --sample_dir 'output/simulated_samples/suzuki' --num_samples 3000 --batch_size 1000
+
+suzukiVisual.py has the script for pCA plots.

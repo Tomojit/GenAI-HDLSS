@@ -65,7 +65,7 @@ The LSH-GAN implementation used in this study is based on the publicly available
 
 ### scDiffusion
 
-The scDiffusion experiments use the implementation provided by the original authors. Instructions and commands required to reproduce the scDiffusion experiments are provided separately in the corresponding repository directory.
+The scDiffusion experiments use the implementation provided by the original authors. See [`Models/scDiffusion/README.md`](Models/scDiffusion/README.md) for setup, requirements, and step-by-step instructions to reproduce the scDiffusion experiments.
 
 ## Quantitative Evaluation
 
