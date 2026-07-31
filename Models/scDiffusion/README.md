@@ -73,3 +73,160 @@ For multi-conditional generation and gradiante interpolation, refer to the comme
 **Experiments reproduce:**
 
 The scripts in the exp_script/ directory can be used to reproduce the results presented in the paper. You can refer the process in any of these scripts to rebuild the gene expression from latent space. The `exp_script/down_stream_analysis_muris.ipynb` can reproduce the marker genes result. The `exp_script/script_diffusion_umap_multi-condi.ipynb` can reproduce the result of two-conditonal generation. The `exp_script/script_diffusion_umap_trajectory.ipynb` can reproduce the result of Gradient Interpolation. The `exp_script/script_diffusion_umap.ipynb` can reproduce the UMAP shown in the paper. The `exp_script/script_static_eval.ipynb` can reproduce the statistical metrics mentioned in the paper.
+
+## Requirements
+
+Install dependencies with:
+```bash
+pip install -r requirements.txt
+```
+See `requirements.txt` in this folder for exact package versions used.
+
+## How to Run
+
+### 1. Environment Setup
+```bash
+conda activate scDiff
+export CUDA_VISIBLE_DEVICES=0
+pip install -r requirements.txt
+```
+
+### 2. Convert CSV to h5ad
+scDiffusion requires input in `.h5ad` format, not raw CSV. Example using the sample GDS1615 dataset:
+
+```python
+# convert_to_h5ad.py
+import pandas as pd
+import anndata
+
+def convert(csv_path, out_path, dataset_name):
+    df = pd.read_csv(csv_path, index_col=0)
+    print(f"{dataset_name}: {df.shape[0]} samples x {df.shape[1]} genes")
+    adata = anndata.AnnData(X=df.values.astype("float32"))
+    adata.obs_names = [f"sample_{i}" for i in range(df.shape[0])]
+    adata.var_names = [str(g) for g in df.columns]
+    adata.write(out_path)
+    print(f"Saved to {out_path}")
+
+convert("data/GDS1615Dataset.csv", "data/GDS1615Dataset.h5ad", "GDS1615")
+```
+```bash
+python convert_to_h5ad.py
+```
+
+### 3. Train the VAE
+```bash
+python VAE/VAE_train.py \
+  --data_dir data/GDS1615Dataset.h5ad \
+  --num_genes 22283 \
+  --save_dir output/VAE/GDS1615 \
+  --max_steps 100000
+```
+
+### 4. Train the diffusion backbone (repeat per seed, 1-5)
+```bash
+python cell_train.py \
+  --data_dir data/GDS1615Dataset.h5ad \
+  --vae_path output/VAE/GDS1615/model_seed=0_step=100000.pt \
+  --model_name GDS1615_diffusion_seed1 \
+  --save_dir output/backbone \
+  --seed 1 \
+  --batch_size 32 \
+  --state_dict None \
+  --lr_anneal_steps 100000
+```
+
+### 5. Generate synthetic samples
+```bash
+python cell_sample.py \
+  --model_path output/backbone/GDS1615_diffusion_seed1/model100000.pt \
+  --vae_path output/VAE/GDS1615/model_seed=0_step=100000.pt \
+  --save_dir output/samples/GDS1615_seed1
+```
+
+### 6. Decode to CSV
+```bash
+python decode_samples.py \
+  --input output/samples/GDS1615_seed1 \
+  --vae_path output/VAE/GDS1615/model_seed=0_step=100000.pt \
+  --output chunk_outputs/GDS1615_seed1/synthetic_full.csv
+```
+
+### 7. Generate PCA comparison plots
+```bash
+python generate_pca_plots.py --dataset GDS1615 --seed 1
+```
+
+## How to Run (GDS1615 Example)
+
+### 1. Convert CSV to h5ad
+scDiffusion requires input in `.h5ad` format. Convert your dataset CSV first:
+
+```python
+# convert_to_h5ad.py
+import pandas as pd
+import anndata
+
+def convert(csv_path, out_path, dataset_name):
+    df = pd.read_csv(csv_path, index_col=0)
+    print(f"{dataset_name}: {df.shape[0]} samples x {df.shape[1]} genes")
+    adata = anndata.AnnData(X=df.values.astype("float32"))
+    adata.obs_names = [f"sample_{i}" for i in range(df.shape[0])]
+    adata.var_names = [str(g) for g in df.columns]
+    adata.write(out_path)
+    print(f"Saved to {out_path}")
+
+convert("data/GDS1615Dataset.csv", "datah5ad/GDS1615.h5ad", "GDS1615")
+```
+```bash
+python convert_to_h5ad.py
+```
+
+### 2. Train the VAE
+```bash
+CUDA_VISIBLE_DEVICES=0 python VAE_train.py \
+  --data_dir datah5ad/GDS1615.h5ad \
+  --num_genes 22282 \
+  --state_dict None \
+  --save_dir output/VAE/GDS1615 \
+  --max_steps 100000 \
+  --seed 42
+```
+
+### 3. Train the Diffusion backbone
+```bash
+CUDA_VISIBLE_DEVICES=0 python cell_train.py \
+  --data_dir datah5ad/GDS1615.h5ad \
+  --vae_path output/VAE/GDS1615/model_seed=42_step=99999.pt \
+  --save_dir output/scDiffusion/GDS1615 \
+  --model_name GDS1615_seed1 \
+  --input_dim 128 \
+  --lr_anneal_steps 100000 \
+  --save_interval 10000 \
+  --batch_size 32 \
+  --seed 1
+```
+
+### 4. Generate Samples
+```bash
+CUDA_VISIBLE_DEVICES=0 python cell_sample.py \
+  --model_path output/scDiffusion/GDS1615/GDS1615_seed1/model100000.pt \
+  --sample_dir output/scDiffusion/GDS1615/GDS1615_seed1/samples \
+  --input_dim 128 \
+  --num_samples 127 \
+  --batch_size 32
+```
+
+### 5. Decode to Original Space
+There is no single generic decode script — each dataset has its own decode script matching its
+preprocessing (standardization, format, gene ordering, etc.). Use the script matching your
+dataset, for example:
+
+- `decode_breastcancer.py` — Breast Cancer (basic)
+- `decode_breastcancer_bio.py` — Breast Cancer (biologically-validated)
+- `decode_Suzuki.py` — Suzuki
+- `decode_RNA.py` — Motion Sickness / RNA
+
+For a new dataset like GDS1615, write or adapt a `decode_<dataset>.py` script following the same
+pattern as the existing ones, matching whatever standardization/format steps were used during
+preprocessing.
