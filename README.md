@@ -65,7 +65,7 @@ The LSH-GAN implementation used in this study is based on the publicly available
 
 ### scDiffusion
 
-The scDiffusion experiments use the implementation provided by the original authors. Instructions and commands required to reproduce the scDiffusion experiments are provided separately in the corresponding repository directory.
+The scDiffusion experiments use the implementation provided by the original authors. See [`Models/scDiffusion/README.md`](Models/scDiffusion/README.md) for setup, requirements, and step-by-step instructions to reproduce the scDiffusion experiments.
 
 ## Quantitative Evaluation
 
@@ -144,7 +144,3 @@ The synthetic data files are compressed to accommodate repository file-size rest
 If you use the code, data-processing workflow, or evaluation resources provided in this repository, please cite the accompanying paper.
 
 Citation information will be updated following publication.
-
-## scDiffusion
-
-See [`Models/scDiffusion/`](Models/scDiffusion/) for the scDiffusion pipeline (block-wise DDPM and VAE-based synthetic scRNA-seq generation), including setup and run instructions.
